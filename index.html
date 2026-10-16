@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engineering Mathematics Quiz</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    min-height: 100vh;
+    color: #222;
+}
+
+.container {
+    max-width: 700px;
+    margin: 20px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 22px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.2);
+    animation: appear 0.6s ease;
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+h1 {
+    text-align: center;
+    color: #6c4bd4;
+    font-size: 27px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+}
+
+.badge {
+    display: inline-block;
+    background: #eee8ff;
+    color: #6c4bd4;
+    padding: 8px 13px;
+    border-radius: 20px;
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+.progress-bg {
+    background: #eee;
+    height: 9px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 15px 0;
+}
+
+#progress {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #667eea, #f093fb);
+    transition: width 0.4s;
+}
+
+#question {
+    font-size: 21px;
+    line-height: 1.5;
+    margin: 22px 0;
+}
+
+.option {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0;
+    border: 2px solid #e4e0f5;
+    border-radius: 12px;
+    background: #faf9ff;
+    font-size: 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.option:hover:not(:disabled) {
+    background: #eee8ff;
+    border-color: #7654db;
+    transform: translateY(-2px);
+}
+
+.option:disabled {
+    cursor: default;
+    opacity: 1;
+}
+
+.correct {
+    background: #d9fbe5 !important;
+    border-color: #21a35b !important;
+}
+
+.wrong {
+    background: #ffe0e0 !important;
+    border-color: #e34848 !important;
+}
+
+#feedback {
+    margin: 15px 0;
+    padding: 13px;
+    border-radius: 10px;
+    line-height: 1.5;
+    display: none;
+}
+
+button.main-btn {
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 12px;
+    transition: 0.2s;
+}
+
+button.main-btn:hover {
+    transform: scale(1.02);
+}
+
+#nextBtn {
+    display: none;
+}
+
+#result {
+    display: none;
+    text-align: center;
+}
+
+.score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #f093fb);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 25px auto;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.small {
+    color: #666;
+    font-size: 14px;
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        margin: 10px auto;
+        padding: 18px;
+    }
+
+    h1 {
+        font-size: 23px;
+    }
+
+    #question {
+        font-size: 18px;
+    }
+
+    .option {
+        font-size: 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div id="quiz">
+        <h1>📘 Engineering Maths Quiz</h1>
+        <p class="subtitle">Learn • Practice • Improve</p>
+
+        <span class="badge">🎯 20 Multiple Choice Questions</span>
+
+        <div class="progress-bg">
+            <div id="progress"></div>
+        </div>
+
+        <p class="small" id="counter">Question 1 of 20</p>
+
+        <h2 id="question"></h2>
+
+        <div id="options"></div>
+
+        <div id="feedback"></div>
+
+        <button class="main-btn" id="nextBtn" onclick="nextQuestion()">
+            Next Question →
+        </button>
+    </div>
+
+    <div id="result">
+        <h1>🎉 Quiz Completed!</h1>
+        <div class="score-circle" id="scoreCircle">0/20</div>
+        <h2 id="resultMessage"></h2>
+        <p id="resultDetails"></p>
+        <button class="main-btn" onclick="restartQuiz()">🔄 Try Again</button>
+    </div>
+
+</div>
+
+<script>
+const questions = [
+    {
+        q: "What is the Laplace transform of 1?",
+        options: ["1/s", "s", "1/s²", "0"],
+        answer: 0,
+        explanation: "The Laplace transform of 1 is 1/s, for s > 0."
+    },
+    {
+        q: "What is the Laplace transform of t?",
+        options: ["1/s", "1/s²", "s²", "2/s³"],
+        answer: 1,
+        explanation: "Using L{tⁿ} = n!/sⁿ⁺¹, L{t} = 1/s²."
+    },
+    {
+        q: "What is the Laplace transform of sin(at)?",
+        options: ["s/(s²+a²)", "a/(s²+a²)", "1/(s+a)", "a/s²"],
+        answer: 1,
+        explanation: "L{sin(at)} = a/(s²+a²)."
+    },
+    {
+        q: "What is the Laplace transform of cos(at)?",
+        options: ["a/(s²+a²)", "s/(s²+a²)", "1/s²", "s/a"],
+        answer: 1,
+        explanation: "L{cos(at)} = s/(s²+a²)."
+    },
+    {
+        q: "What is the derivative of x²?",
+        options: ["x", "2x", "x³", "2"],
+        answer: 1,
+        explanation: "By the power rule, d(x²)/dx = 2x."
+    },
+    {
+        q: "What is the integral of 1 with respect to x?",
+        options: ["0", "x²", "x + C", "1/x + C"],
+        answer: 2,
+        explanation: "The integral of 1 is x + C."
+    },
+    {
+        q: "What is the determinant of [[1,2],[3,4]]?",
+        options: ["2", "-2", "10", "4"],
+        answer: 1,
+        explanation: "The determinant is (1×4) − (2×3) = −2."
+    },
+    {
+        q: "What is the identity matrix of order 2?",
+        options: ["[[0,1],[1,0]]", "[[1,1],[1,1]]", "[[1,0],[0,1]]", "[[0,0],[0,0]]"],
+        answer: 2,
+        explanation: "An identity matrix has 1s on the main diagonal and 0s elsewhere."
+    },
+    {
+        q: "What is the value of sin(π/2)?",
+        options: ["0", "1", "-1", "1/2"],
+        answer: 1,
+        explanation: "sin(π/2) = 1."
+    },
+    {
+        q: "What is the value of cos(0)?",
+        options: ["0", "1", "-1", "1/2"],
+        answer: 1,
+        explanation: "cos(0) = 1."
+    },
+    {
+        q: "What is the derivative of sin(x)?",
+        options: ["−sin(x)", "cos(x)", "tan(x)", "−cos(x)"],
+        answer: 1,
+        explanation: "The derivative of sin(x) is cos(x)."
+    },
+    {
+        q: "What is the derivative of eˣ?",
+        options: ["xeˣ", "eˣ", "1/eˣ", "0"],
+        answer: 1,
+        explanation: "The derivative of eˣ is eˣ."
+    },
+    {
+        q: "What is the integral of cos(x)?",
+        options: ["−sin(x)+C", "sin(x)+C", "cos(x)+C", "tan(x)+C"],
+        answer: 1,
+        explanation: "The integral of cos(x) is sin(x) + C."
+    },
+    {
+        q: "What is the order of the differential equation d²y/dx² + y = 0?",
+        options: ["1", "2", "3", "0"],
+        answer: 1,
+        explanation: "The highest derivative is the second derivative, so the order is 2."
+    },
+    {
+        q: "What is the degree of (dy/dx)² + y = 0?",
+        options: ["1", "2", "3", "0"],
+        answer: 1,
+        explanation: "The highest derivative is raised to power 2, so the degree is 2."
+    },
+    {
+        q: "What is the dot product of perpendicular vectors?",
+        options: ["1", "−1", "0", "Infinity"],
+        answer: 2,
+        explanation: "The dot product is |A||B|cos(90°) = 0."
+    },
+    {
+        q: "What is the magnitude of vector (3,4)?",
+        options: ["5", "7", "12", "1"],
+        answer: 0,
+        explanation: "Magnitude = √(3²+4²) = √25 = 5."
+    },
+    {
+        q: "What is the Fourier series mainly used to represent?",
+        options: ["Only matrices", "Periodic functions", "Only constants", "Only polynomials"],
+        answer: 1,
+        explanation: "Fourier series represents suitable periodic functions using sine and cosine terms."
+    },
+    {
+        q: "What is the value of logₑ(e)?",
+        options: ["0", "1", "e", "−1"],
+        answer: 1,
+        explanation: "The natural logarithm of e is 1."
+    },
+    {
+        q: "If A = [[1,2],[3,4]], what is the sum of its diagonal entries?",
+        options: ["4", "5", "10", "6"],
+        answer: 1,
+        explanation: "The trace is the sum of diagonal entries: 1 + 4 = 5."
+    }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function showQuestion() {
+    answered = false;
+
+    const q = questions[current];
+
+    document.getElementById("counter").textContent =
+        `Question ${current + 1} of ${questions.length}`;
+
+    document.getElementById("progress").style.width =
+        `${(current / questions.length) * 100}%`;
+
+    document.getElementById("question").textContent =
+        `${current + 1}. ${q.q}`;
+
+    document.getElementById("options").innerHTML = "";
+    document.getElementById("feedback").style.display = "none";
+    document.getElementById("nextBtn").style.display = "none";
+
+    q.options.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.className = "option";
+        button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+        button.onclick = () => checkAnswer(index, button);
+        document.getElementById("options").appendChild(button);
+    });
+}
+
+function checkAnswer(selected, button) {
+    if (answered) return;
+    answered = true;
+
+    const q = questions[current];
+    const buttons = document.querySelectorAll(".option");
+
+    buttons.forEach(b => b.disabled = true);
+
+    buttons[q.answer].classList.add("correct");
+
+    const feedback = document.getElementById("feedback");
+    feedback.style.display = "block";
+
+    if (selected === q.answer) {
+        score++;
+        feedback.style.background = "#d9fbe5";
+        feedback.style.color = "#146c38";
+        feedback.innerHTML = "✅ <b>Correct!</b> " + q.explanation;
+    } else {
+        button.classList.add("wrong");
+        feedback.style.background = "#ffe0e0";
+        feedback.style.color = "#9b2020";
+        feedback.innerHTML = "❌ <b>Incorrect!</b> The correct answer is " +
+            q.options[q.answer] + ". " + q.explanation;
+    }
+
+    document.getElementById("nextBtn").style.display = "block";
+
+    if (current === questions.length - 1) {
+        document.getElementById("nextBtn").textContent = "View Result 🏆";
+    }
+}
+
+function nextQuestion() {
+    if (!answered) return;
+
+    current++;
+
+    if (current < questions.length) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("result").style.display = "block";
+    document.getElementById("progress").style.width = "100%";
+
+    document.getElementById("scoreCircle").textContent =
+        `${score}/${questions.length}`;
+
+    const percentage = (score / questions.length) * 100;
+
+    let message = "Keep Practicing! 💪";
+
+    if (percentage >= 80) {
+        message = "Excellent Work! 🌟";
+    } else if (percentage >= 50) {
+        message = "Good Job! 👏";
+    }
+
+    document.getElementById("resultMessage").textContent = message;
+
+    document.getElementById("resultDetails").textContent =
+        `You scored ${percentage}% and answered ${score} out of ${questions.length} questions correctly.`;
+}
+
+function restartQuiz() {
+    current = 0;
+    score = 0;
+
+    document.getElementById("quiz").style.display = "block";
+    document.getElementById("result").style.display = "none";
+    document.getElementById("nextBtn").textContent = "Next Question →";
+
+    showQuestion();
+}
+
+showQuestion();
+</script>
+
+</body>
+</html>
